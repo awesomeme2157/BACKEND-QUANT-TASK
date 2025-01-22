@@ -1,43 +1,56 @@
 const path = require('path');
 const fs = require('fs');
-const { loadCSV } = require('./dataLoader');
+const { loadCSV, normalizeIntradayData } = require('./dataLoader');
 const { preprocessDayData, calculateRollingVolume } = require('./processor');
 
 (async () => {
     try {
+        console.log('--- Starting Script ---');
+
         // File paths
         const sampleDayFile = path.join(__dirname, '../data/SampleDayData.csv');
         const intradayFile19 = path.join(__dirname, '../data/19thAprilSampleData.csv');
         const intradayFile22 = path.join(__dirname, '../data/22ndAprilSampleData.csv');
         const outputFile = path.join(__dirname, '../output/results.json');
 
-        // Measure time to load data
+        // Load and normalize data
         console.time('Load CSV Files');
         const dayData = await loadCSV(sampleDayFile);
-        const intradayData19 = await loadCSV(intradayFile19);
-        const intradayData22 = await loadCSV(intradayFile22);
-        console.timeEnd('Load CSV Files'); // Log how long it took to load files
+        const intradayData19Raw = await loadCSV(intradayFile19);
+        const intradayData22Raw = await loadCSV(intradayFile22);
+        console.timeEnd('Load CSV Files');
 
-        // Measure time to preprocess day data
+        console.time('Normalize Intraday Data');
+        const intradayData19 = normalizeIntradayData(intradayData19Raw);
+        const intradayData22 = normalizeIntradayData(intradayData22Raw);
+        console.timeEnd('Normalize Intraday Data');
+
         console.time('Process Day Data');
         const avgVolumes = preprocessDayData(dayData);
-        console.timeEnd('Process Day Data'); // Log how long it took to calculate 30-day averages
+        console.timeEnd('Process Day Data');
 
-        // Measure time to process intraday data
         console.time('Process Intraday Data for 19th April');
-        const result19 = calculateRollingVolume(intradayData19, avgVolumes);
+        const results19 = calculateRollingVolume(intradayData19, avgVolumes);
         console.timeEnd('Process Intraday Data for 19th April');
 
         console.time('Process Intraday Data for 22nd April');
-        const result22 = calculateRollingVolume(intradayData22, avgVolumes);
+        const results22 = calculateRollingVolume(intradayData22, avgVolumes);
         console.timeEnd('Process Intraday Data for 22nd April');
 
-        // Combine and save results
-        console.time('Save Results');
-        const finalResults = { '19th April 2024': result19, '22nd April 2024': result22 };
-        fs.writeFileSync(outputFile, JSON.stringify(finalResults, null, 2));
-        console.timeEnd('Save Results'); // Log how long it took to save the results
+        // Combine results
+        const results = {
+            "19th April 2024": results19.map(result => ({
+                stock_name: result.stock_name,
+                timestamp: result.timestamp ? new Date(result.timestamp).toLocaleString() : null
+            })),
+            "22nd April 2024": results22.map(result => ({
+                stock_name: result.stock_name,
+                timestamp: result.timestamp ? new Date(result.timestamp).toLocaleString() : null
+            }))
+        };
 
+        // Save results to output file
+        fs.writeFileSync(outputFile, JSON.stringify(results, null, 2));
         console.log(`Results saved to ${outputFile}`);
     } catch (err) {
         console.error('Error:', err);
