@@ -47,8 +47,7 @@ function loadCSV(filePath) {
 }
 
 /**
- * Normalize intraday data by combining Date and Time into a single timestamp
- * and standardizing column names.
+ * Normalize intraday data by ensuring the timestamp field is valid and in ISO format.
  * @param {Array} data - Raw intraday data.
  * @returns {Array} - Normalized intraday data.
  */

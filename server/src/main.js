@@ -29,13 +29,13 @@ const { preprocessDayData, calculateRollingVolume } = require('./processor');
         const avgVolumes = preprocessDayData(dayData);
         console.timeEnd('Process Day Data');
 
-        console.time('Process Intraday Data for 19th April');
-        const results19 = calculateRollingVolume(intradayData19, avgVolumes);
-        console.timeEnd('Process Intraday Data for 19th April');
-
         console.time('Process Intraday Data for 22nd April');
         const results22 = calculateRollingVolume(intradayData22, avgVolumes);
         console.timeEnd('Process Intraday Data for 22nd April');
+
+        console.time('Process Intraday Data for 19th April');
+        const results19 = calculateRollingVolume(intradayData19, avgVolumes);
+        console.timeEnd('Process Intraday Data for 19th April');
 
         // Combine results
         const results = {
