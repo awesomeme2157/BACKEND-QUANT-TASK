@@ -41,11 +41,11 @@ const { preprocessDayData, calculateRollingVolume } = require('./processor');
         const results = {
             "19th April 2024": results19.map(result => ({
                 stock_name: result.stock_name,
-                timestamp: result.timestamp ? new Date(result.timestamp).toLocaleString() : null
+                timestamp: result.timestamp ? `${result.timestamp.split('T')[0]} ${result.timestamp.split('T')[1].replace('Z', '')}` : null
             })),
             "22nd April 2024": results22.map(result => ({
                 stock_name: result.stock_name,
-                timestamp: result.timestamp ? new Date(result.timestamp).toLocaleString() : null
+                timestamp: result.timestamp ? `${result.timestamp.split('T')[0]} ${result.timestamp.split('T')[1].replace('Z', '')}` : null
             }))
         };
 
